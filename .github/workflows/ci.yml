@@ -5,10 +5,22 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  test:
+  test-and-publish-report:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -24,10 +36,23 @@ jobs:
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Run Cucumber tests
-        run: mvn -B clean test
+      - name: Run Cucumber tests and generate HTML report
+        run: mvn -B clean verify
 
-      - name: Upload Cucumber report
+      - name: Prepare report for GitHub Pages
+        id: report
+        if: always()
+        run: |
+          REPORT_DIR="CucumberReport/cucumber-html-reports"
+          if [ ! -f "$REPORT_DIR/overview-features.html" ]; then
+            echo "::warning::Cucumber HTML report was not generated. Skipping Pages deploy."
+            echo "report_exists=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cp "$REPORT_DIR/overview-features.html" "$REPORT_DIR/index.html"
+          echo "report_exists=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Cucumber report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -36,3 +61,20 @@ jobs:
             target/cucumber.json
             CucumberReport/
           if-no-files-found: ignore
+
+      - name: Upload Pages artifact
+        if: steps.report.outputs.report_exists == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: CucumberReport/cucumber-html-reports
+
+      - name: Deploy report to GitHub Pages
+        if: steps.report.outputs.report_exists == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Add report link to job summary
+        if: steps.deployment.outputs.page_url != ''
+        run: |
+          echo "## Cucumber Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "View the latest report: [${{ steps.deployment.outputs.page_url }}](${{ steps.deployment.outputs.page_url }})" >> "$GITHUB_STEP_SUMMARY"
