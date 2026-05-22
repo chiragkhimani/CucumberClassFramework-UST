@@ -1,7 +1,8 @@
 package com.automation.steps;
 
-import com.automation.pages.LoginPage;
+import com.automation.pages.web.LoginPage;
 import com.automation.utils.ConfigReader;
+import com.automation.utils.ReportManager;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -18,6 +19,8 @@ public class LoginSteps {
 
     @Then("verify user is on login page")
     public void verify_user_is_on_login_page() {
+        ReportManager.log("Validated Login Page");
+        ReportManager.attachScreenshot();
         Assert.assertTrue(loginPage.isLoginPageDisplayed());
     }
 

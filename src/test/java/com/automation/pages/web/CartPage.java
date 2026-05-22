@@ -1,4 +1,4 @@
-package com.automation.pages;
+package com.automation.pages.web;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -17,6 +17,7 @@ public class CartPage extends BasePage {
     @FindBy(id = "checkout")
     WebElement checkBtn;
 
+
     public boolean isCartPageDisplayed() {
         return cartPageTitle.isDisplayed();
     }
@@ -34,4 +35,6 @@ public class CartPage extends BasePage {
     public void clickOnCheckoutBtn() {
         checkBtn.click();
     }
+
+
 }

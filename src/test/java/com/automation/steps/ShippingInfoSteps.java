@@ -1,6 +1,6 @@
 package com.automation.steps;
 
-import com.automation.pages.ShippingInfoPage;
+import com.automation.pages.web.ShippingInfoPage;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;

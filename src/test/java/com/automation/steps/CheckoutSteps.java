@@ -1,6 +1,6 @@
 package com.automation.steps;
 
-import com.automation.pages.CheckoutPage;
+import com.automation.pages.web.CheckoutPage;
 import io.cucumber.java.en.Then;
 import org.junit.Assert;
 
